@@ -1,0 +1,43 @@
+name: Publish to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # Set a branch to deploy
+  pull_request:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true  # Cancel previous runs if a new one is triggered
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.0
+        with:
+          submodules: true  # Fetch Hugo themes (true OR recursive)
+          fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v3.0.0 # Update to the latest version if available
+        with:
+          hugo-version: '0.135.0'
+          # Uncomment the line below if you need the extended version
+          # extended: true
+
+      - name: Build the site
+        run: hugo --minify
+      
+      # Mastodon Website verification
+      # - name: Update Mastodon link
+      #   run: |
+      #     sed -i 's|<a href=https://mastodon.social/@starfreck|<a href=https://mastodon.social/@starfreck rel=me|g' ./public/index.html
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4.0.0  # Update to the latest version if available
+        if: ${{ github.ref == 'refs/heads/main' }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}  # Use the built-in token
+          publish_dir: ./public
