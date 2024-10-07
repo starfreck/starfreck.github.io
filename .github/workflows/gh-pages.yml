@@ -14,14 +14,17 @@ jobs:
       cancel-in-progress: true  # Cancel previous runs if a new one is triggered
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repository with submodules
         uses: actions/checkout@v4.2.0
         with:
-          submodules: true  # Fetch Hugo themes (true OR recursive)
-          fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
+          submodules: true        # Fetch Hugo themes (true OR recursive)
+          fetch-depth: 0          # Fetch all history for .GitInfo and .Lastmod
+
+      - name: Initialize submodules
+        run: git submodule update --init --recursive
 
       - name: Setup Hugo
-        uses: peaceiris/actions-hugo@v3.0.0 # Update to the latest version if available
+        uses: peaceiris/actions-hugo@v3.0.0  # Update to the latest version if available
         with:
           hugo-version: '0.135.0'
           # Uncomment the line below if you need the extended version
